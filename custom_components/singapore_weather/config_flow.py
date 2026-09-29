@@ -35,21 +35,45 @@ class SingaporeWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     def _schema(self, data: dict[str, Any] | None = None) -> probatio.Schema:
         data = data or {}
 
+        home_latitude = (
+            probatio.Required(
+                CONF_HOME_LATITUDE,
+                default=data[CONF_HOME_LATITUDE],
+            )
+            if CONF_HOME_LATITUDE in data
+            else probatio.Required(CONF_HOME_LATITUDE)
+        )
+        home_longitude = (
+            probatio.Required(
+                CONF_HOME_LONGITUDE,
+                default=data[CONF_HOME_LONGITUDE],
+            )
+            if CONF_HOME_LONGITUDE in data
+            else probatio.Required(CONF_HOME_LONGITUDE)
+        )
+        work_latitude = (
+            probatio.Required(
+                CONF_WORK_LATITUDE,
+                default=data[CONF_WORK_LATITUDE],
+            )
+            if CONF_WORK_LATITUDE in data
+            else probatio.Required(CONF_WORK_LATITUDE)
+        )
+        work_longitude = (
+            probatio.Required(
+                CONF_WORK_LONGITUDE,
+                default=data[CONF_WORK_LONGITUDE],
+            )
+            if CONF_WORK_LONGITUDE in data
+            else probatio.Required(CONF_WORK_LONGITUDE)
+        )
+
         return probatio.Schema(
             {
-                probatio.Required(
-                    CONF_API_KEY,
-                    default=data.get(CONF_API_KEY, ""),
-                ): TextSelector(
+                probatio.Required(CONF_API_KEY): TextSelector(
                     TextSelectorConfig(type=TextSelectorType.PASSWORD)
                 ),
-                probatio.Required(
-                    CONF_HOME_LATITUDE,
-                    default=data.get(
-                        CONF_HOME_LATITUDE,
-                        self.hass.config.latitude,
-                    ),
-                ): NumberSelector(
+                home_latitude: NumberSelector(
                     NumberSelectorConfig(
                         min=-90,
                         max=90,
@@ -57,13 +81,7 @@ class SingaporeWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         mode=NumberSelectorMode.BOX,
                     )
                 ),
-                probatio.Required(
-                    CONF_HOME_LONGITUDE,
-                    default=data.get(
-                        CONF_HOME_LONGITUDE,
-                        self.hass.config.longitude,
-                    ),
-                ): NumberSelector(
+                home_longitude: NumberSelector(
                     NumberSelectorConfig(
                         min=-180,
                         max=180,
@@ -71,10 +89,7 @@ class SingaporeWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         mode=NumberSelectorMode.BOX,
                     )
                 ),
-                probatio.Required(
-                    CONF_WORK_LATITUDE,
-                    default=data.get(CONF_WORK_LATITUDE, 0),
-                ): NumberSelector(
+                work_latitude: NumberSelector(
                     NumberSelectorConfig(
                         min=-90,
                         max=90,
@@ -82,10 +97,7 @@ class SingaporeWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         mode=NumberSelectorMode.BOX,
                     )
                 ),
-                probatio.Required(
-                    CONF_WORK_LONGITUDE,
-                    default=data.get(CONF_WORK_LONGITUDE, 0),
-                ): NumberSelector(
+                work_longitude: NumberSelector(
                     NumberSelectorConfig(
                         min=-180,
                         max=180,
@@ -168,9 +180,19 @@ class SingaporeWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 )
             errors["base"] = error
 
-        data = dict(entry.data)
+        data = {
+            key: value
+            for key, value in entry.data.items()
+            if key != CONF_API_KEY
+        }
         if user_input:
-            data.update(user_input)
+            data.update(
+                {
+                    key: value
+                    for key, value in user_input.items()
+                    if key != CONF_API_KEY
+                }
+            )
 
         return self.async_show_form(
             step_id="reauth_confirm",
@@ -195,9 +217,19 @@ class SingaporeWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 )
             errors["base"] = error
 
-        data = dict(entry.data)
+        data = {
+            key: value
+            for key, value in entry.data.items()
+            if key != CONF_API_KEY
+        }
         if user_input:
-            data.update(user_input)
+            data.update(
+                {
+                    key: value
+                    for key, value in user_input.items()
+                    if key != CONF_API_KEY
+                }
+            )
 
         return self.async_show_form(
             step_id="reconfigure",
