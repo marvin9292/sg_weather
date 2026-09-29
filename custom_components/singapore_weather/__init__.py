@@ -41,6 +41,20 @@ async def async_setup(hass: HomeAssistant, config: dict):
     return True
 
 
+async def async_migrate_entry(
+    hass: HomeAssistant,
+    entry: ConfigEntry,
+) -> bool:
+    """Migrate old Singapore Weather config entries."""
+    if entry.version == 1:
+        hass.config_entries.async_update_entry(
+            entry,
+            version=2,
+        )
+
+    return True
+
+
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
