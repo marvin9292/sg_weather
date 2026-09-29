@@ -3,12 +3,19 @@ from __future__ import annotations
 from typing import Any
 
 from aiohttp import ClientError
-import voluptuous as vol
+import probatio
 
 from homeassistant import config_entries
 from homeassistant.config_entries import ConfigFlowResult
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
-from homeassistant.helpers.selector import TextSelector, TextSelectorConfig, TextSelectorType
+from homeassistant.helpers.selector import (
+    NumberSelector,
+    NumberSelectorConfig,
+    NumberSelectorMode,
+    TextSelector,
+    TextSelectorConfig,
+    TextSelectorType,
+)
 
 from .const import (
     BASE_HEADERS,
@@ -22,46 +29,70 @@ from .const import (
 )
 
 
-def _latitude(value: Any) -> float:
-    return vol.All(vol.Coerce(float), vol.Range(min=-90, max=90))(value)
-
-
-def _longitude(value: Any) -> float:
-    return vol.All(vol.Coerce(float), vol.Range(min=-180, max=180))(value)
-
-
 class SingaporeWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 2
 
-    def _schema(self, data: dict[str, Any] | None = None) -> vol.Schema:
+    def _schema(self, data: dict[str, Any] | None = None) -> probatio.Schema:
         data = data or {}
-        work_latitude = (
-            vol.Required(CONF_WORK_LATITUDE, default=data[CONF_WORK_LATITUDE])
-            if CONF_WORK_LATITUDE in data
-            else vol.Required(CONF_WORK_LATITUDE)
-        )
-        work_longitude = (
-            vol.Required(CONF_WORK_LONGITUDE, default=data[CONF_WORK_LONGITUDE])
-            if CONF_WORK_LONGITUDE in data
-            else vol.Required(CONF_WORK_LONGITUDE)
-        )
 
-        return vol.Schema(
+        return probatio.Schema(
             {
-                vol.Required(
+                probatio.Required(
                     CONF_API_KEY,
                     default=data.get(CONF_API_KEY, ""),
-                ): TextSelector(TextSelectorConfig(type=TextSelectorType.PASSWORD)),
-                vol.Required(
+                ): TextSelector(
+                    TextSelectorConfig(type=TextSelectorType.PASSWORD)
+                ),
+                probatio.Required(
                     CONF_HOME_LATITUDE,
-                    default=data.get(CONF_HOME_LATITUDE, self.hass.config.latitude),
-                ): _latitude,
-                vol.Required(
+                    default=data.get(
+                        CONF_HOME_LATITUDE,
+                        self.hass.config.latitude,
+                    ),
+                ): NumberSelector(
+                    NumberSelectorConfig(
+                        min=-90,
+                        max=90,
+                        step="any",
+                        mode=NumberSelectorMode.BOX,
+                    )
+                ),
+                probatio.Required(
                     CONF_HOME_LONGITUDE,
-                    default=data.get(CONF_HOME_LONGITUDE, self.hass.config.longitude),
-                ): _longitude,
-                work_latitude: _latitude,
-                work_longitude: _longitude,
+                    default=data.get(
+                        CONF_HOME_LONGITUDE,
+                        self.hass.config.longitude,
+                    ),
+                ): NumberSelector(
+                    NumberSelectorConfig(
+                        min=-180,
+                        max=180,
+                        step="any",
+                        mode=NumberSelectorMode.BOX,
+                    )
+                ),
+                probatio.Required(
+                    CONF_WORK_LATITUDE,
+                    default=data.get(CONF_WORK_LATITUDE, 0),
+                ): NumberSelector(
+                    NumberSelectorConfig(
+                        min=-90,
+                        max=90,
+                        step="any",
+                        mode=NumberSelectorMode.BOX,
+                    )
+                ),
+                probatio.Required(
+                    CONF_WORK_LONGITUDE,
+                    default=data.get(CONF_WORK_LONGITUDE, 0),
+                ): NumberSelector(
+                    NumberSelectorConfig(
+                        min=-180,
+                        max=180,
+                        step="any",
+                        mode=NumberSelectorMode.BOX,
+                    )
+                ),
             }
         )
 
@@ -137,9 +168,13 @@ class SingaporeWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 )
             errors["base"] = error
 
+        data = dict(entry.data)
+        if user_input:
+            data.update(user_input)
+
         return self.async_show_form(
             step_id="reauth_confirm",
-            data_schema=self._schema(entry.data | (user_input or {})),
+            data_schema=self._schema(data),
             errors=errors,
         )
 
@@ -160,8 +195,12 @@ class SingaporeWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 )
             errors["base"] = error
 
+        data = dict(entry.data)
+        if user_input:
+            data.update(user_input)
+
         return self.async_show_form(
             step_id="reconfigure",
-            data_schema=self._schema(entry.data | (user_input or {})),
+            data_schema=self._schema(data),
             errors=errors,
         )
