@@ -1,0 +1,50 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Singapore Weather",
+        "description": "Enter your personal data.gov.sg API key and the private locations used by the lightning-near-home/work sensors. These values are stored in your Home Assistant config entry and are not included in the public source code.",
+        "data": {
+          "api_key": "data.gov.sg API key",
+          "home_latitude": "Home latitude",
+          "home_longitude": "Home longitude",
+          "work_latitude": "Work latitude",
+          "work_longitude": "Work longitude"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Re-authenticate Singapore Weather",
+        "description": "Enter your data.gov.sg API key and private Home/Work coordinates. This migration removes credentials and personal coordinates from the integration source code.",
+        "data": {
+          "api_key": "data.gov.sg API key",
+          "home_latitude": "Home latitude",
+          "home_longitude": "Home longitude",
+          "work_latitude": "Work latitude",
+          "work_longitude": "Work longitude"
+        }
+      },
+      "reconfigure": {
+        "title": "Update Singapore Weather private settings",
+        "description": "Update your data.gov.sg API key or Home/Work coordinates.",
+        "data": {
+          "api_key": "data.gov.sg API key",
+          "home_latitude": "Home latitude",
+          "home_longitude": "Home longitude",
+          "work_latitude": "Work latitude",
+          "work_longitude": "Work longitude"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "The data.gov.sg API key is invalid.",
+      "rate_limited": "data.gov.sg rate limit reached. Try again later.",
+      "cannot_connect": "Unable to connect to data.gov.sg.",
+      "unknown": "Unexpected response from data.gov.sg."
+    },
+    "abort": {
+      "single_instance_allowed": "Only one Singapore Weather entry is allowed.",
+      "reauth_successful": "Singapore Weather private settings updated successfully.",
+      "reconfigure_successful": "Singapore Weather private settings updated successfully."
+    }
+  }
+}
