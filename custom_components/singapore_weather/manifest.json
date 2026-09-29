@@ -1,0 +1,9 @@
+{
+  "domain": "singapore_weather",
+  "name": "Singapore Weather",
+  "version": "1.1.0",
+  "requirements": [],
+  "iot_class": "cloud_polling",
+  "config_flow": true,
+  "single_config_entry": true
+}
